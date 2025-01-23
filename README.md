@@ -62,7 +62,7 @@ This project utilizes a robust technology stack, ensuring performance, scalabili
 ![View Transactions Screenshot](screenshots/view_transaction.png)
 
 ### Insights View
-![Insights Screenshot](screenshots/Insights.png)
+![Insights Screenshot](screenshots/insights.png)
 
 ### Manage Budget View
 ![Manage Budget Screenshot](screenshots/manage_budget.png)
