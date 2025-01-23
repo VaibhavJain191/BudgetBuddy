@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Budget Management - Finance Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .budget-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .budget-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid rgba(0, 13, 255, 0.1);
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #000DFF;
+        box-shadow: 0 0 0 0.25rem rgba(0, 13, 255, 0.25);
+    }
+
+    .btn-primary {
+        background: #000DFF;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: #0008CC;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 13, 255, 0.3);
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .budget-table {
+        margin-bottom: 0;
+    }
+
+    .budget-table thead th {
+        background: #000DFF;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border: none;
+    }
+
+    .budget-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .budget-table tbody tr:hover {
+        background-color: rgba(0, 13, 255, 0.05);
+        transform: scale(1.01);
+    }
+
+    .budget-progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e9ecef;
+        margin-top: 0.5rem;
+    }
+
+    .progress-bar {
+        transition: width 1s ease-in-out;
+    }
+
+    .floating-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .pulse-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 mb-4 text-primary">
+                <i class="fas fa-wallet me-3 animate__animated animate__bounceIn"></i>
+                Budget Management
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Budget Form -->
+        <div class="col-lg-5">
+            <div class="budget-card animate__animated animate__fadeInLeft">
+                <h3 class="mb-4">
+                    <i class="fas fa-plus-circle me-2 floating-icon"></i>
+                    Set New Budget
+                </h3>
+                <form action="/budget" method="POST">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="category" name="category" required onchange="toggleOtherCategoryInput()">
+                            <option value="">Select a category</option>
+                            <option value="Food">Food</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Others">Others</option>
+                        </select>
+                        <label for="category">Category</label>
+                    </div>
+
+                    <div id="other-category-container" style="display: none;" class="form-floating mb-3 animate__animated animate__fadeIn">
+                        <input type="text" class="form-control" id="other_category" name="other_category" placeholder="Specify category">
+                        <label for="other_category">Specify Other Category</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="budget" name="budget" required placeholder="Enter amount">
+                        <label for="budget">Budget Amount ($)</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <select class="form-select" id="period" name="period" required>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                        <label for="period">Period</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 animate__animated animate__pulse animate__infinite">
+                        <i class="fas fa-save me-2"></i>
+                        Set Budget
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Budgets -->
+        <div class="col-lg-7">
+            <div class="budget-card animate__animated animate__fadeInRight">
+                <h3 class="mb-4">
+                    <i class="fas fa-chart-pie me-2 pulse-icon"></i>
+                    Current Budgets
+                </h3>
+                <div class="table-container">
+                    <table class="table budget-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <i class="fas fa-tag me-2"></i>
+                                    Category
+                                </th>
+                                <th>
+                                    <i class="fas fa-dollar-sign me-2"></i>
+                                    Budget
+                                </th>
+                                <th>
+                                    <i class="fas fa-shopping-cart me-2"></i>
+                                    Spent
+                                </th>
+                                <th>
+                                    <i class="fas fa-piggy-bank me-2"></i>
+                                    Remaining
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for budget in budgets %}
+                            <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ loop.index * 0.1 }}s">
+                                <td>
+                                    <i class="fas fa-folder me-2"></i>
+                                    {{ budget.category }}
+                                </td>
+                                <td>${{ budget.budget }}</td>
+                                <td>${{ budget.spent }}</td>
+                                <td>
+                                    {% set remaining = budget.budget - budget.spent %}
+                                    {% set percentage = (budget.spent / budget.budget * 100) | round %}
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="{% if remaining < 0 %}text-danger{% elif remaining < (budget.budget * 0.2) %}text-warning{% else %}text-success{% endif %}">
+                                            ${{ remaining }}
+                                        </span>
+                                        <small class="text-muted">{{ percentage }}%</small>
+                                    </div>
+                                    
+                                    <div class="budget-progress">
+                                        <div class="progress-bar {% if percentage >= 100 %}bg-danger{% elif percentage >= 80 %}bg-warning{% else %}bg-success{% endif %}"
+                                             role="progressbar"
+                                             style="width: {{ percentage }}%"
+                                             aria-valuenow="{{ percentage }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleOtherCategoryInput() {
+        const categorySelect = document.getElementById('category');
+        const otherCategoryContainer = document.getElementById('other-category-container');
+        
+        if (categorySelect.value === 'Others') {
+            otherCategoryContainer.style.display = 'block';
+            otherCategoryContainer.classList.add('animate__animated', 'animate__fadeIn');
+        } else {
+            otherCategoryContainer.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Summary - Finance Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .kpi-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 2px solid rgba(0, 13, 255, 0.1);
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        border-color: #000DFF;
+    }
+
+    .kpi-icon {
+        font-size: 2.5rem;
+        color: #000DFF;
+        margin-bottom: 1rem;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #000DFF;
+        margin-bottom: 0.5rem;
+    }
+
+    .kpi-label {
+        font-size: 1rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        height: 400px; /* Fixed height for the chart */
+        overflow: hidden;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .stats-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .floating-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .pulse-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 mb-4 text-primary">
+                <i class="fas fa-chart-pie me-3 animate__animated animate__rotateIn"></i>
+                Financial Insights
+            </h1>
+        </div>
+    </div>
+
+    <!-- Main Stats Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Income Overview -->
+        <div class="col-md-4">
+            <div class="stats-card shadow-sm animate__animated animate__fadeInUp">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="stats-icon bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="stats-label mb-0">Monthly Income</h6>
+                        <h3 class="stats-value text-success">${{ total_income | round(2) }}</h3>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-success me-2">
+                        <i class="fas fa-chart-line me-1"></i> +2.5%
+                    </span>
+                    <small class="text-muted">vs last month</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Overview -->
+        <div class="col-md-4">
+            <div class="stats-card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="stats-icon bg-danger bg-opacity-10 text-danger">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="stats-label mb-0">Monthly Expenses</h6>
+                        <h3 class="stats-value text-danger">${{ total_expenses | round(2) }}</h3>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-danger me-2">
+                        <i class="fas fa-chart-line me-1"></i> +4.2%
+                    </span>
+                    <small class="text-muted">vs last month</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Overview -->
+        <div class="col-md-4">
+            <div class="stats-card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="stats-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="stats-label mb-0">Net Balance</h6>
+                        <h3 class="stats-value {% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ${{ balance | round(2) }}
+                        </h3>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge {% if balance >= 0 %}bg-success{% else %}bg-danger{% endif %} me-2">
+                        <i class="fas fa-chart-line me-1"></i>
+                        {% if balance >= 0 %}Positive{% else %}Negative{% endif %}
+                    </span>
+                    <small class="text-muted">current balance</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Stats Row -->
+    <div class="row g-4 mb-4">
+        <!-- Daily Average -->
+        <div class="col-md-6">
+            <div class="stats-card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.6s;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="stats-icon bg-info bg-opacity-10 text-info">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="stats-label mb-0">Daily Average Spending</h6>
+                        <h3 class="stats-value text-info">${{ avg_daily_spending | round(2) }}</h3>
+                    </div>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-info" style="width: 65%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Category -->
+        <div class="col-md-6">
+            <div class="stats-card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.8s;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="stats-label mb-0">Top Spending Category</h6>
+                        <h3 class="stats-value text-warning">{{ top_category }}</h3>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-warning me-2">
+                        <i class="fas fa-dollar-sign me-1"></i>${{ top_category_amount | round(2) }}
+                    </span>
+                    <small class="text-muted">total spent in category</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mt-5">
+    <div class="col-12">
+        <div class="summary-card p-4 animate__animated animate__fadeIn" style="animation-delay: 1s;">
+            <h2 class="mb-4">
+                <i class="fas fa-chart-line me-2 animate__animated animate__slideInDown"></i>
+                Financial Analytics
+            </h2>
+            <div class="chart-container" style="height: 400px;"> <!-- Set a fixed height -->
+                {% include "chart.html" %}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

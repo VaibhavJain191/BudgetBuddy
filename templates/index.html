@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Finance Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.4s ease;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(0, 13, 255, 0.05), transparent);
+        transform: translateX(-100%);
+        transition: 0.6s;
+    }
+
+    .feature-card:hover::before {
+        transform: translateX(100%);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 13, 255, 0.2);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(0, 13, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        transition: all 0.4s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: rotateY(360deg);
+        background: rgba(0, 13, 255, 0.2);
+    }
+
+    .feature-icon i {
+        font-size: 2rem;
+        color: #000DFF;
+        transition: all 0.4s ease;
+    }
+
+    .feature-card:hover .feature-icon i {
+        transform: scale(1.2);
+    }
+
+    .feature-title {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-button {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-home { background: #000DFF; color: white; }
+    .btn-add { background: #000DFF; color: white; }
+    .btn-view { background: #000DFF; color: white; }
+    .btn-manage { background: #000DFF; color: white; }
+    .btn-predict { background: #000DFF; color: white; }
+    .btn-insights { background: #000DFF; color: white; }
+
+    .feature-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 13, 255, 0.3);
+        background: #0008CC;
+        color: white;
+    }
+
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .welcome-title {
+        color: #2c3e50;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .welcome-title i {
+        color: #000DFF;
+        animation: pulse 2s infinite;
+    }
+
+    .logout-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .logout-btn {
+        background: linear-gradient(135deg, #ff6b6b 0%, #dc3545 100%);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        border-radius: 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .logout-btn::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        transform: rotate(0deg);
+        animation: rotate 10s linear infinite;
+    }
+
+    .logout-btn:hover {
+        background: linear-gradient(135deg, #ff5252 0%, #c82333 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-section animate__animated animate__fadeIn">
+    <h1 class="welcome-title">
+        <i class="fas fa-chart-line"></i>
+        Welcome to BudgetBuddy, {{ username }}!
+    </h1>
+</div>
+
+<div class="card-grid">
+    <a href="/" class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+        <div class="feature-icon">
+            <i class="fas fa-home"></i>
+        </div>
+        <h2 class="feature-title">Home</h2>
+        <p class="feature-description">Navigate back to your dashboard.</p>
+        <div class="feature-button btn-home">Go to Home</div>
+    </a>
+
+    <a href="/add_transaction" class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+        <div class="feature-icon">
+            <i class="fas fa-plus-circle"></i>
+        </div>
+        <h2 class="feature-title">Add Transaction</h2>
+        <p class="feature-description">Record income and expenses quickly.</p>
+        <div class="feature-button btn-add">Add Now</div>
+    </a>
+
+    <a href="/view_transactions" class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+        <div class="feature-icon">
+            <i class="fas fa-list"></i>
+        </div>
+        <h2 class="feature-title">View Transactions</h2>
+        <p class="feature-description">Check your financial history.</p>
+        <div class="feature-button btn-view">View Now</div>
+    </a>
+
+    <a href="/budget" class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+        <div class="feature-icon">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <h2 class="feature-title">Manage Budget</h2>
+        <p class="feature-description">Plan and organize your budget.</p>
+        <div class="feature-button btn-manage">Manage Budget</div>
+    </a>
+
+    <a href="/predictions" class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.5s">
+        <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h2 class="feature-title">Predictions</h2>
+        <p class="feature-description">Forecast income and expenses.</p>
+        <div class="feature-button btn-predict">See Predictions</div>
+    </a>
+
+    <a href="/insights" class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
+        <div class="feature-icon">
+            <i class="fas fa-lightbulb"></i>
+        </div>
+        <h2 class="feature-title">Insights</h2>
+        <p class="feature-description">Analyze your spending habits.</p>
+        <div class="feature-button btn-insights">View Insights</div>
+    </a>
+</div>
+
+<div class="logout-section">
+    <a href="{{ url_for('logout') }}" class="logout-btn animate__animated animate__fadeInUp" style="animation-delay: 0.7s">
+        <i class="fas fa-sign-out-alt me-2"></i>Logout
+    </a>
+</div>
+{% endblock %}

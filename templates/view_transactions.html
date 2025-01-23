@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}View Transactions - Finance Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .search-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .table-container {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .table thead th {
+        background: #000DFF;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 13, 255, 0.05);
+        transform: scale(1.01);
+    }
+
+    .btn-primary {
+        background: #000DFF;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: #0008CC;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 13, 255, 0.3);
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        padding: 0.6rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #000DFF;
+        box-shadow: 0 0 0 0.2rem rgba(0, 13, 255, 0.25);
+    }
+
+    .icon-spin {
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 mb-4 text-primary">
+                <i class="fas fa-list-ul me-3 animate__animated animate__flipInX"></i>
+                View Transactions
+            </h1>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">
+                <i class="fas fa-search me-2 animate__animated animate__pulse animate__infinite"></i>
+                Search & Filter
+            </h5>
+            <button id="toggle-search-options" class="btn btn-primary">
+                <i class="fas fa-filter me-2"></i>Search
+            </button>
+        </div>
+
+        <div id="search-options" style="display: none;">
+            <form method="GET" action="/view_transactions" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" name="search" placeholder="Search by description..." value="{{ request.args.get('search') }}">
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                        <select name="category" id="category-select" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="Food" {% if request.args.get('category') == 'Food' %}selected{% endif %}>Food</option>
+                            <option value="Entertainment" {% if request.args.get('category') == 'Entertainment' %}selected{% endif %}>Entertainment</option>
+                            <option value="Utilities" {% if request.args.get('category') == 'Utilities' %}selected{% endif %}>Utilities</option>
+                            <option value="Special" {% if request.args.get('category') == 'Special' %}selected{% endif %}>Others</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4" id="special-input" style="display: none;">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                        <input type="text" class="form-control" name="special_notes" placeholder="Please specify...">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" class="form-control" name="start_date" value="{{ request.args.get('start_date') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" class="form-control" name="end_date" value="{{ request.args.get('end_date') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                        <input type="number" class="form-control" name="amount" placeholder="Min Amount" value="{{ request.args.get('amount') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export and Import Section -->
+    <div class="search-card p-4 mb-4">
+        <h5 class="mb-4">
+            <i class="fas fa-exchange-alt me-2 animate__animated animate__rotateIn"></i>
+            Export and Import Data
+        </h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <form action="/export_transactions" method="POST">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-file-csv me-2 animate__animated animate__bounceIn"></i>
+                        Export to CSV
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <form action="/export_pdf" method="POST">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-file-pdf me-2 animate__animated animate__bounceIn"></i>
+                        Export to PDF
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <form action="/import_transactions" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
+                    <input type="file" class="form-control" name="file" accept=".csv, .xlsx" required>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-2 animate__animated animate__bounceIn"></i>
+                        Import
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>
+                            <i class="fas fa-file-alt me-2 icon-spin"></i>
+                            Description
+                        </th>
+                        <th>
+                            <i class="fas fa-dollar-sign me-2 icon-spin"></i>
+                            Amount
+                        </th>
+                        <th>
+                            <i class="fas fa-calendar-alt me-2 icon-spin"></i>
+                            Date
+                        </th>
+                        <th>
+                            <i class="fas fa-tag me-2 icon-spin"></i>
+                            Category
+                        </th>
+                        <th>
+                            <i class="fas fa-credit-card me-2 icon-spin"></i>
+                            Payment Method
+                        </th>
+                        <th>
+                            <i class="fas fa-sticky-note me-2 icon-spin"></i>
+                            Notes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr class="animate__animated animate__fadeIn">
+                        <td>{{ transaction.description }}</td>
+                        <td>${{ transaction.amount }}</td>
+                        <td>{{ transaction.date }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ transaction.category }}</span>
+                        </td>
+                        <td>
+                            <i class="fas fa-{{ 'credit-card' if transaction.payment_method == 'Credit Card' else 'money-bill' }} me-2"></i>
+                            {{ transaction.payment_method }}
+                        </td>
+                        <td>{{ transaction.notes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('toggle-search-options').addEventListener('click', function() {
+        const searchOptions = document.getElementById('search-options');
+        const icon = this.querySelector('i');
+        if (searchOptions.style.display === 'none') {
+            searchOptions.style.display = 'block';
+            icon.classList.remove('fa-filter');
+            icon.classList.add('fa-times');
+            searchOptions.classList.add('animate__animated', 'animate__fadeIn');
+        } else {
+            searchOptions.style.display = 'none';
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-filter');
+        }
+    });
+
+    document.getElementById('category-select').addEventListener('change', function() {
+        const specialInput = document.getElementById('special-input');
+        if (this.value === 'Special') {
+            specialInput.style.display = 'block';
+            specialInput.classList.add('animate__animated', 'animate__fadeIn');
+        } else {
+            specialInput.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

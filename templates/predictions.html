@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Income and Expense Predictions - Finance Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prediction-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .prediction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .prediction-table {
+        margin-bottom: 0;
+    }
+
+    .prediction-table thead th {
+        background: #000DFF;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border: none;
+    }
+
+    .prediction-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .prediction-table tbody tr:hover {
+        background-color: rgba(0, 13, 255, 0.05);
+        transform: scale(1.01);
+    }
+
+    .prediction-progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e9ecef;
+        margin-top: 0.5rem;
+    }
+
+    .progress-bar {
+        transition: width 1s ease-in-out;
+    }
+
+    .floating-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .pulse-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    .prediction-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .prediction-badge.savings {
+        background: rgba(0, 200, 83, 0.1);
+        color: #00c853;
+    }
+
+    .prediction-badge.risk {
+        background: rgba(255, 75, 75, 0.1);
+        color: #ff4b4b;
+    }
+
+    .trend-indicator {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+    }
+
+    .trend-up {
+        color: #00c853;
+    }
+
+    .trend-down {
+        color: #ff4b4b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 mb-4 text-primary">
+                <i class="fas fa-chart-line me-3 animate__animated animate__slideInDown"></i>
+                Income and Expense Predictions
+            </h1>
+        </div>
+    </div>
+
+    <!-- Predictions Table -->
+    <div class="prediction-card animate__animated animate__fadeIn">
+        <h3 class="mb-4">
+            <i class="fas fa-crystal-ball me-2 pulse-icon"></i>
+            Future Financial Projections
+        </h3>
+        <div class="table-container">
+            <table class="table prediction-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <i class="fas fa-calendar me-2 floating-icon"></i>
+                            Month
+                        </th>
+                        <th>
+                            <i class="fas fa-arrow-trend-up me-2 floating-icon"></i>
+                            Predicted Income
+                        </th>
+                        <th>
+                            <i class="fas fa-arrow-trend-down me-2 floating-icon"></i>
+                            Predicted Expenses
+                        </th>
+                        <th>
+                            <i class="fas fa-scale-balanced me-2 floating-icon"></i>
+                            Potential Outcome
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prediction in prediction_data %}
+                    <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ loop.index * 0.1 }}s">
+                        <td>
+                            <i class="fas fa-calendar-day me-2"></i>
+                            {{ prediction.month }}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                ${{ prediction.predicted_income | round(2) }}
+                                {% if loop.index > 1 %}
+                                    {% set income_change = prediction.predicted_income - prediction_data[loop.index0 - 1].predicted_income %}
+                                    <span class="trend-indicator {{ 'trend-up' if income_change > 0 else 'trend-down' }}">
+                                        <i class="fas fa-{{ 'arrow-up' if income_change > 0 else 'arrow-down' }}"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                ${{ prediction.predicted_expenses | round(2) }}
+                                {% if loop.index > 1 %}
+                                    {% set expense_change = prediction.predicted_expenses - prediction_data[loop.index0 - 1].predicted_expenses %}
+                                    <span class="trend-indicator {{ 'trend-up' if expense_change > 0 else 'trend-down' }}">
+                                        <i class="fas fa-{{ 'arrow-up' if expense_change > 0 else 'arrow-down' }}"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if prediction.predicted_income >= prediction.predicted_expenses %}
+                                <div class="prediction-badge savings">
+                                    <i class="fas fa-piggy-bank"></i>
+                                    Potential Savings: ${{ (prediction.predicted_income - prediction.predicted_expenses) | round(2) }}
+                                </div>
+                            {% else %}
+                                <div class="prediction-badge risk">
+                                    <i class="fas fa-triangle-exclamation"></i>
+                                    Overspending Risk: ${{ (prediction.predicted_expenses - prediction.predicted_income) | round(2) }}
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

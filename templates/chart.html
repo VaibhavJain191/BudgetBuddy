@@ -1,0 +1,231 @@
+<div class="row g-4">
+    <!-- Income vs Expenses Chart -->
+    <div class="col-lg-8 animate__animated animate__fadeInLeft">
+        <div class="chart-card p-4">
+            <h3 class="chart-title mb-4">
+                <i class="fas fa-chart-line me-2 animate__animated animate__slideInDown"></i>
+                Income vs Expenses Trend
+            </h3>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="incomeExpensesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Distribution Chart -->
+    <div class="col-lg-4 animate__animated animate__fadeInRight">
+        <div class="chart-card p-4">
+            <h3 class="chart-title mb-4">
+                <i class="fas fa-chart-pie me-2 animate__animated animate__slideInDown"></i>
+                Expense Distribution
+            </h3>
+            <div class="chart-wrapper" style="height: 400px;">
+                <canvas id="expensePieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Alerts -->
+    <div class="col-12 animate__animated animate__fadeInUp">
+        <div class="alerts-container">
+            {% for budget in budgets %}
+                {% if budget.spent > budget.budget %}
+                    <div class="alert alert-warning alert-dismissible fade show animate__animated animate__headShake" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2 pulse-icon"></i>
+                        <strong>Budget Alert:</strong> You have exceeded your budget for {{ budget.category }}!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .chart-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .chart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .chart-title {
+        color: #000DFF;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        margin: auto;
+        width: 100%;
+    }
+
+    .alerts-container {
+        margin-top: 2rem;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+    }
+
+    .pulse-icon {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart.js Global Configuration
+    Chart.defaults.font.family = "'Segoe UI', 'Arial', sans-serif";
+    Chart.defaults.font.size = 13;
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 13, 255, 0.8)';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.legend.labels.padding = 20;
+
+    // Line chart data
+    const data = JSON.parse('{{ line_chart_data | tojson | safe }}');
+    const labels = data.map(entry => entry.date);
+    const incomes = data.map(entry => entry.income);
+    const expenses = data.map(entry => entry.expense);
+
+    // Pie chart data
+    const pieData = JSON.parse('{{ pie_chart_data | tojson | safe }}');
+    const pieLabels = pieData.map(entry => entry.category);
+    const pieValues = pieData.map(entry => entry.amount);
+
+    // Line Chart: Income vs Expenses
+    const ctx1 = document.getElementById('incomeExpensesChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: incomes,
+                    borderColor: '#000DFF',
+                    backgroundColor: 'rgba(0, 13, 255, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#000DFF'
+                },
+                {
+                    label: 'Expenses',
+                    data: expenses,
+                    borderColor: '#FF4B4B',
+                    backgroundColor: 'rgba(255, 75, 75, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#FF4B4B'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    grid: {
+                        borderDash: [8, 4]
+                    },
+                    title: {
+                        display: true,
+                        text: 'Amount ($)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Pie Chart: Expense Distribution
+    const ctx2 = document.getElementById('expensePieChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieValues,
+                backgroundColor: [
+                    'rgba(0, 13, 255, 0.8)',
+                    'rgba(255, 75, 75, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(0, 200, 83, 0.8)',
+                    'rgba(156, 39, 176, 0.8)',
+                    'rgba(33, 150, 243, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            },
+            cutout: '60%',
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        }
+    });
+</script>
