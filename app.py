@@ -272,8 +272,8 @@ def budget():
 
         try:
             mongo.db.budgets.update_one(
-                {'category': category, 'period': period}, 
-                {'$set': budget_entry}, 
+                {'category': category, 'period': period},
+                {'$set': budget_entry},
                 upsert=True
             )
             flash('Budget set successfully!', 'success')
@@ -285,15 +285,22 @@ def budget():
     try:
         budgets = list(mongo.db.budgets.find())
         transactions = list(mongo.db.transactions.find())
+
         for budget in budgets:
-            budget['spent'] = sum(
-                t['amount'] for t in transactions 
+            # Calculate total spent for the category and period
+            budget['spent'] = abs(sum(
+                t['amount'] for t in transactions
                 if t['category'] == budget['category'] and t['amount'] < 0
-            )
+            ))
+
+            # Calculate remaining budget
+            budget['remaining'] = budget['budget'] - budget['spent']
+
         return render_template('budget.html', budgets=budgets)
     except Exception as e:
         flash(f'An error occurred: {str(e)}', 'error')
         return render_template('budget.html', budgets=[])
+
 
 @app.route('/predictions')
 @login_required
