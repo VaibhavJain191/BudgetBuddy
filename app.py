@@ -10,7 +10,11 @@ import io
 from weasyprint import HTML
 from functools import wraps
 
+                       
 
+
+
+                       
 # Flask app setup
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb+srv://VaibhavJain:vaibhav1324@budgetbuddy.vpmyy.mongodb.net/finance_db?retryWrites=true&w=majority&appName=BudgetBuddy"
