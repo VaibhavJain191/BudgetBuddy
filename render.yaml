@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: finance-manager
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://VaibhavJain:Vaibhav1324@budgetbuddy.vpmyy.mongodb.net/?retryWrites=true&w=majority&appName=BudgetBuddy

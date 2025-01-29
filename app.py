@@ -13,7 +13,7 @@ from functools import wraps
 
 # Flask app setup
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/finance_db"
+app.config["MONGO_URI"] = "mongodb+srv://VaibhavJain:Vaibhav1324@budgetbuddy.vpmyy.mongodb.net/?retryWrites=true&w=majority&appName=BudgetBuddy"
 app.secret_key = 'MUST FILL ALL COLUMNS'
 mongo = PyMongo(app)
 
