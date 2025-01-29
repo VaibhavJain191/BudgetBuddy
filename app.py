@@ -110,7 +110,6 @@ def index():
 
 
 
-
 @app.route('/add_transaction', methods=['GET', 'POST'])
 @login_required
 def add_transaction():
@@ -138,7 +137,9 @@ def add_transaction():
             flash('Amount must be a number!', 'error')
             return redirect(url_for('add_transaction'))
 
+        # Include the user_id in the transaction document
         transaction = {
+            'user_id': session['user_id'],  # Link transaction to the logged-in user
             'description': description,
             'amount': amount,
             'date': date,
@@ -169,7 +170,7 @@ def view_transactions():
         search_query = request.args.get('search')
 
         # Build the query
-        query = {}
+        query = {'user_id': session['user_id']}  # Filter transactions by user_id
         if category_filter:
             query['category'] = category_filter
         if start_date and end_date:
@@ -188,10 +189,11 @@ def view_transactions():
         return render_template('view_transactions.html', transactions=[])
     
 @app.route('/summary')
+@login_required
 def summary():
     try:
-        # Fetch transactions from the database
-        transactions = list(mongo.db.transactions.find())
+        # Fetch transactions for the logged-in user
+        transactions = list(mongo.db.transactions.find({'user_id': session['user_id']}))
         
         # Calculate total income, expenses, and balance
         total_income = sum(t['amount'] for t in transactions if t['amount'] > 0)
@@ -244,7 +246,6 @@ def summary():
         flash(f'An error occurred: {str(e)}', 'error')
         return render_template('summary.html', total_income=0, total_expenses=0, balance=0, avg_daily_spending=0, top_category="N/A", top_category_amount=0, line_chart_data=[], pie_chart_data=[])
 
-
 @app.route('/budget', methods=['GET', 'POST'])
 @login_required
 def budget():
@@ -264,6 +265,7 @@ def budget():
             return redirect(url_for('budget'))
 
         budget_entry = {
+            'user_id': session['user_id'],  # Link budget to the logged-in user
             'category': category,
             'budget': budget,
             'period': period,
@@ -272,7 +274,7 @@ def budget():
 
         try:
             mongo.db.budgets.update_one(
-                {'category': category, 'period': period},
+                {'user_id': session['user_id'], 'category': category, 'period': period},
                 {'$set': budget_entry},
                 upsert=True
             )
@@ -283,8 +285,8 @@ def budget():
         return redirect(url_for('budget'))
 
     try:
-        budgets = list(mongo.db.budgets.find())
-        transactions = list(mongo.db.transactions.find())
+        budgets = list(mongo.db.budgets.find({'user_id': session['user_id']}))
+        transactions = list(mongo.db.transactions.find({'user_id': session['user_id']}))
 
         for budget in budgets:
             # Calculate total spent for the category and period
@@ -301,12 +303,12 @@ def budget():
         flash(f'An error occurred: {str(e)}', 'error')
         return render_template('budget.html', budgets=[])
 
-
 @app.route('/predictions')
 @login_required
 def predictions():
     try:
-        transactions = list(mongo.db.transactions.find())
+        # Fetch transactions for the logged-in user
+        transactions = list(mongo.db.transactions.find({'user_id': session['user_id']}))
         
         # Calculate monthly income and expenses
         monthly_data = defaultdict(lambda: {'income': 0, 'expenses': 0})
@@ -344,7 +346,8 @@ def predictions():
 @login_required
 def export_transactions():
     try:
-        transactions = list(mongo.db.transactions.find())
+        # Fetch transactions for the logged-in user
+        transactions = list(mongo.db.transactions.find({'user_id': session['user_id']}))
         df = pd.DataFrame(transactions)
         
         # Create a BytesIO stream for the CSV
@@ -361,7 +364,8 @@ def export_transactions():
 @login_required
 def export_pdf():
     try:
-        transactions = list(mongo.db.transactions.find())
+        # Fetch transactions for the logged-in user
+        transactions = list(mongo.db.transactions.find({'user_id': session['user_id']}))
         df = pd.DataFrame(transactions)
         html = df.to_html()
         
@@ -394,6 +398,8 @@ def import_transactions():
 
             # Convert DataFrame to dictionary and insert into MongoDB
             transactions = df.to_dict(orient='records')
+            for transaction in transactions:
+                transaction['user_id'] = session['user_id']  # Link transaction to the logged-in user
             mongo.db.transactions.insert_many(transactions)
             flash('Transactions imported successfully!', 'success')
         else:
