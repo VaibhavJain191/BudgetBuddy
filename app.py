@@ -9,6 +9,12 @@ import pandas as pd
 import io
 from weasyprint import HTML
 from functools import wraps
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
 
                        
 
@@ -17,8 +23,8 @@ from functools import wraps
                        
 # Flask app setup
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb+srv://VaibhavJain:vaibhav1324@budgetbuddy.vpmyy.mongodb.net/finance_db?retryWrites=true&w=majority&appName=BudgetBuddy"
-app.secret_key = 'MUST FILL ALL COLUMNS'
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
+app.secret_key = os.getenv("SECRET_KEY")
 mongo = PyMongo(app)
 
 
